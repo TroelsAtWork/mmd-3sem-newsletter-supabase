@@ -1,3 +1,4 @@
+import Button from "@/components/Button";
 import {
   addSubscriber,
   getSubscribers,
@@ -22,21 +23,16 @@ export default async function Home() {
       <ul>
         {subscribers.map((subscriber) => {
           return (
-            <form action={deleteSubscriber}>
-              <li
-                className="border border-slate-500 bg-slate-100 rounded-xl p-3 w-80 mb-2 flex justify-between"
-                key={subscriber.id}
-              >
+            <form key={subscriber.email}>
+              <li className="border border-slate-500 bg-slate-100 rounded-xl p-3 w-80 mb-2 flex justify-between">
                 {subscriber.email}
-                <button className="bg-red-500 rounded-xl p-2 text-white">
-                  Delete
-                </button>
               </li>
-              <input
+              {/* <input
                 type="hidden"
                 name="subscriber"
                 value={subscriber.email}
-              />
+              /> */}
+              <Button myaction={deleteSubscriber} />
             </form>
           );
         })}
