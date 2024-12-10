@@ -1,3 +1,4 @@
+"use server";
 import { createClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
@@ -9,26 +10,43 @@ const supabase = createClient(
 
 // Get all subscribers
 export const getSubscribers = async () => {
-  "use server";
   const { data, error } = await supabase.from("subscriptions").select("email");
   return data;
 };
 
-// Add a new subscriber
-export const addSubscriber = async (formData) => {
-  "use server";
-  const { error } = await supabase
+// Check if the email is already subscribed
+export const isSubscribed = async (email) => {
+  const { data, error } = await supabase
     .from("subscriptions")
-    .insert({ email: formData.get("email") });
-  revalidatePath("/");
+    .select("email")
+    .eq("email", email);
+  return data.length > 0;
+};
+
+//Add a new subscriber
+export const addSubscriber = async (prevState, formData) => {
+  const email = formData.get("email");
+  if (await isSubscribed(email)) return "You are already subscribed!";
+  if (!email) return "Please enter your email!";
+
+  try {
+    const { error } = await supabase
+      .from("subscriptions")
+      .insert({ email: email });
+    if (error) throw error;
+    revalidatePath("/");
+  } catch (error) {
+    console.log("error: ", error);
+    if (error.code == "23505") return "You are already subscribed!";
+  }
 };
 
 // Delete a subscriber
 export const deleteSubscriber = async (formData) => {
-  "use server";
   const { error } = await supabase
     .from("subscriptions")
     .delete()
     .eq("email", formData.get("subscriber"));
+
   revalidatePath("/");
 };
